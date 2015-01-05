@@ -11,6 +11,7 @@ import (
 )
 
 var file = flag.String("file", "", "path to file to read (newline delimited)")
+var debug = flag.Bool("debug", false, "")
 
 func main() {
 	flag.Parse()
@@ -30,14 +31,18 @@ func main() {
 			go func(url string) {
 				defer wg.Done()
 				if !validProtocol.MatchString(url) {
-					fmt.Printf("URL %s does not have protocol, using http\n", url)
+					if *debug {
+						fmt.Printf("URL %s does not have protocol, using http\n", url)
+					}
 					url = "http://" + url
 				}
 				resp, err := http.Get(url)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Printf("URL %s failed with:\n%s", url, err)
 				} else {
-					fmt.Printf("%+v\n", resp)
+					if *debug {
+						fmt.Printf("%+v\n", resp)
+					}
 					if resp.StatusCode >= 300 {
 						fmt.Printf("%s returned with %d\n", url, resp.StatusCode)
 					}
